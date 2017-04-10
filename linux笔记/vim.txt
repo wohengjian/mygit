@@ -1,0 +1,135 @@
+vim  编辑器之神 1991    vi 1976
+emacs 神的编辑器    1975
+文本文档  notepad++
+
+IDE  集成开发环境
+
+命令模式    esc返回到命令模式
+i  进入插入模式，光标维持不动
+I  进入插入模式，光标会停留在行首
+a  进入插入模式，将光标后移一格
+A  进入插入模式，光标移动到行尾
+o  进入插入模式，向下新建一行开始
+O  进入插入模式，向上新建一行开始
+u  回退，对修改的返回
+ctrl+r 前进
+插入模式
+末行模式 “：”保存、退出、定位、查询、修改
+注：在任何模式下如果希望进行模式间的切换，都必须先返回到命令行模式，所以esc很有用
+
+:q!  在vim中这个表示强制退出
+:wq 保存并退出
+:X  加密
+:x  写入退出
+末行模式下的内容替换
+:s/lp/lg/   在当前行找到lp并替换为lg
+:s/lp/lg/g  最后的g表示全局，这里的全局是指的当前行
+:/XX  表示搜索文档中包含xx的内容。搜索出的内容会高亮显示，按n可以在所有内容中逐个向下查看，N向上查看
+:6s/bin/Linux/g     6s表示修改第六行
+:.,$s/bin/llll/g   .表示当前行，$表示最后一行
+:%s/bin/xxx/    %表示全局替换                         
+:%s/^#//g   ^表示开头，这里的理解是将整个文档开头带#的内容全部删除。（最后2个/没有空格，所以是删除）
+
+命令行模式下的定位：  n（数字） G
+gg  回到第一行
+G   回到最后一行
+复制 yy
+黏贴 p
+10yy  表示复制10行
+剪切  dd  删除
+r（紧跟你希望的字符）  替换一个字符
+x  删除一个字符
+
+M 光标移动到屏幕中央的行的第一个字符
+H 光标移动到当前屏幕第一行的第一个字符
+L 光标移动到屏幕最后一行的第一个字符
+0 数字0直接到光标所在行的第一个字符
+$ 到光标所在行的最后一个字符
+
+块选择 ctrl+v
+分屏 :sp
+ctrl+w 上下箭头，切换（建议ctrl w w）
+
+多文档编辑  vim file1 file2  
+:next  进入下一个文档
+:N   返回上一个文档
+:files  查看当前所有打开的文档
+
+2017/3/30
+[root@centos6 ~]# vim .vimrc
+vim的配置文件
+set nocompatible     关闭兼容模式
+set compatible 就是让vim关闭所有扩展的功能，尽量模拟 vi 的行为。但这样就不应用vim的很多强大功能，所以一般没有什么特殊需要的话（比如执行很老的 vi 脚本），都要在 vim 的配置开始，写上 set nocompatible，关闭兼容模式。由于这个选项是最最基础的选项，会连带很多其它选项发生变动（称作副作用），所以它必需是第一个设定的选项。
+set?fileencodings=gbk,ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,sjis,euc-kr,ucs-2le,latin1 
+设置多编码处理??
+set?encoding=utf-8
+set fileformats=unix,dos,mac 设置文件格式??
+set backup        指定备份，不需要改为nobackup
+set backupdir=~/backup    设置备份文件目录
+set history=50    设置搜索的历史记录
+set?ignorecase?smartcase    搜索时忽略大小写，但在有一个或以上大写字母时仍保持对大小写敏感??
+set ignorecase    搜索时忽略大小写
+set hlsearch    高亮查找内容
+set cursorline　高亮显示当前行
+set cursorcolumn　高亮显示当前列
+set incsearch    使用增量查找，不需要加noincsearch
+set number    设置行号
+set showmatch    显示配对括号
+syntax on     开启语法高亮
+filetype?on    打开文件类型检测功能，根据文件名自动判断文件类型，实际上执行的是$vimRUNTIME/filetype.vim脚本
+set laststatus=2　　　总是显示状态栏
+colorscheme?xoria256? 指定配色方案??
+highlight Comment ctermfg=LightCyan   更改注释颜色为淡青色，前提是开启语法高亮
+set wrap   自动折行，在默认情况下，Vim会自动折行––将超出屏幕范围的文本打断并显示在下一行
+set undolevels=1000   允许撤销的次数
+set?ruler   显示当前位置于右下角
+set?textwidth=100  每行最大 100 字符
+set?tenc=gbk  term 下的编码，可选
+
+
+vundle插件管理器，它本身也是插件，但是通过它可以管理上千个vim的其他插件，通过插件的组合，可以制作属于自己的IDE（集成开发环境）
+[root@centos6 ~]# mkdir -p .vim/bundle
+所有的插件下载后都会安装在这个目录下，包括我们需要下载的vundle
+
+
+
+git  版本控制
+a1.0  
+a1.1 
+a1.2
+a1.3
+版本     用户      日期    改变
+1.0      zrq       2.21    第三行xx
+2.0      zrq       2.23    删除第三行
+3.0      lmx       2.28    改变了题目
+
+git  最好的分布式版本控制系统
+往Git版本库里添加文件的时候，是分两步执行的：
+第一步是用git add把文件添加进去，实际上就是把文件修改添加到暂存区；
+第二步是用git commit提交更改，实际上就是把暂存区的所有内容提交到当前分支。一旦提交后，如果你又没有对工作区做任何修改，那么工作区就是“干净”的；
+因为我们创建Git版本库时，Git自动为我们创建了唯一一个master分支，所以，git commit就是往master分支上提交更改。
+可以简单理解为，需要提交的文件修改通通放到暂存区，然后，一次性提交暂存区的所有修改。如果还有不理解的可以先百度或谷歌，还不理解再问我。
+
+[root@centos6 ~]# mkdir mygit
+创建一个目录，mygit，这个目录作为我们的仓库
+[root@centos6 mygit]# git init 
+在我们的仓库目录中初始化，生成.git目录，这个目录用来追踪版本变化
+[root@centos6 mygit]# cp /etc/passwd .
+[root@centos6 mygit]# git add passwd
+[root@centos6 mygit]# git commit -m "1936.1.0"   将仓库中的文件提交，参数m为注释信息
+[root@centos7 mygit]# git diff passwd    对比文件的前后区别
+[root@centos7 mygit]# git add  passwd  添加到仓库中
+[root@centos7 mygit]# git status    显示当前被修改过的文件，根据有没有状态显示我们可以决定是否需要提交
+[root@centos7 mygit]# git commit -m "this is 1.1"    提交文件到仓库
+[root@centos7 mygit]# git status   再次查看当前是否存在需要提交的修改文件，显示clean
+[root@centos7 mygit]# git log   显示从最近到最远的提交日志。
+注：log里显示的commit id是sha1计算出来的，可以防止在多人协同时版本号的冲突。比如都用数字(1,2,3,4)做版本号。
+[root@centos7 mygit]# git reset --hard d5047b134117e0ec38ed1468c40bb4e5b6071fe1   根据git log显示的commit版本号回退到最初
+[root@centos7 mygit]# git log   再次查看版本，因为已经回退到最初，所以提交的日志也只有最初的
+[root@centos7 mygit]# git reflog     查看reflog，这里记录每次命令操作，可以通过里面的commit id号前进到各个版本
+oot@centos7 mygit]# rm passwd    删除文件
+[root@centos7 mygit]# git checkout -- passwd   撤掉所有对工作区的修改，对于修改后没有提交的情况下可以撤销所有修改，对于误删的文件也可以恢复
+[root@centos7 mygit]# git rm passwd   删除版本库中的文件
+[root@centos7 mygit]# git commit -m "remove"  提交，文件从版本库中被删除
+[root@centos7 mygit]# git reflog    查看历史记录
+[root@centos7 mygit]# git reset --hard d5047b1   仍然可以通过git恢复
