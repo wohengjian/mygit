@@ -1,0 +1,65 @@
+================软件安装========================
+debain： /etc/apt/source.list
+sudo apt-get update  更新源
+sudo apt-get upgrade  更新系统
+sudo apt-get autoremove  自动删除一些不是用的软件包
+
+==============源码编译安装======================
+优点：定制性高
+缺点：耗时长
+./configure  定制环境
+make   编译
+make install   安装
+
+==============rpm包安装(debain  dpkg)=================
+优点：简单方便
+缺点：功能无法定制，存在包依赖
+rpm -qa   查看系统中所有的rpm软件包
+rpm -qa  |grep kernel   查看系统中包含kernel字符的软件包
+rpm -ql  kernel*  查看这个包安装的具体路径
+rpm  -qlp  kernel*.rpm  
+根据rpm包查看安装后的路径，通常用于安装前
+rpm -qc  kernel  查看这个软件包的配置文件所在的路径
+rpm -qf  /usr/bin/rz  根据指令逆向找出软件包
+rpm -Uvh  升级内核之类不要使用这个更新方式。U表示更新rpm包，如果包没有安装过，那就安装，如果装过，先卸载，重新安装当前版本。
+rpm  -e tree  卸载软件包
+dpkg -ivh （乌班图安装命令）
+
+============ 源 ===============
+/etc/yum.repos.d/        rhel类系统在这个目录下存放了系统自带的源文件
+/etc/apt/source.list.d/  (debain类系统的源文件)
+
+apt-get update  更新源
+apt-get autoremove  
+
+\ 转义
+
+epel源
+DNF 
+dnf -list  = yum list 
+dnf search tree   = yum search tree
+dnf provides /usr/bin/rz  = yum whatprovides /usr/bin/rz
+根据程序的指令来获取程序的安装包名称
+[root@centos7 /]# dnf list available
+ 列出当前系统可以使用的软件包
+[root@centos7 /]# dnf  check-update 
+检查当前哪些软件包需要更新
+[root@centos7 /]# dnf autoremove 
+自动删除没有依赖关系的独立的无用的包
+
+ ubuntu更新系统：apt-get  upgrade
+ apt-get dist-upgrade
+ 
+ apt-get autoreomve
+ rhel更新源    yum update 
+ rhel更新系统  yum upgrade
+ 
+ =======通过终端管理服务器的软件============
+ putty、secureCRT、Xmanger（xshell）
+ 非对称加密（RSA）--对称加密
+
+ yum  install  gcc  用于库依赖，必须安装
+ yum install  lrzsz  用于终端远程上传和下载到服务器，必须保证终端具备modem协议，通常用crt、xshell、putty等使用
+ yum install bash-completion
+这个工具用来实现在bash环境中的命令自动补齐
+ yum install net-tools   提供了ifconfig等网络指令集

@@ -1,0 +1,22 @@
+指令 - 选项 - 参数
+ls -help     一个- 表示h e l p 组合选项
+ls --help    两个--表示后面的选项就是一个单词 这个单词就是选项	
+ls -a        表示查看所有文件，在linux系统中，隐藏文件的文件名以.开头
+ls -l
+-d           解压
+
+which ll
+alias la='ls -la'        自定义命令组合
+touch  XXXX              创建文件
+rm /rm -f /rm -f *       删除（询问）/不询问/所有  
+xxxx --help              指令XX帮助
+whatis ls                查看ls的描述
+which ls                 查看ls的来历
+man 1 ls                 查看ls的帮助文档
+在手册中查看内容时可以通过/关键词来检索主要内容 按n检索关键词从上往下看 按shift+n从下往上看 按q退出
+sync                    将内存中的内容写入缓存
+poweroff                保存完后关机（常用）
+shutdown                关机
+halt = shutdown -h      快速关机
+pwd                     查看当前目录
+su - tom                切换tom账户登陆 

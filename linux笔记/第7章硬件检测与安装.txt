@@ -1,0 +1,42 @@
+=============网络基本配置=====================
+[root@centos6 桌面]# cd /etc/sysconfig/network-scripts/ifcfg（网卡名字）
+BOOTPROTO=static
+IPADDR=192.168.24.44
+NETMASK=255.255.255.0
+GATEWAY=192.168.24.254
+DNS1=192.168.24.254
+[root@centos6 network-scripts]# service network restart
+RHEL7                           systemctl restart network
+重启网络服务
+[root@centos6 network-scripts]# service NetworkManager stop
+RHEL7                           systemctl NetworkManager stop
+[root@centos6 network-scripts]# chkconfig NetworkManager off
+关闭NetworkManager服务，防止冲突
+注：配置文件的每一个修改，要想生效都必须重启服务
+pkgs.org软件包下载网址
+
+
+##################################
+########## 硬件检测  #############
+##################################
+
+
+[root@centos6 桌面]# cat /proc/cpuinfo          查看cpu信息
+[root@centos6 ~]# lspci                         查看所有的板卡信息
+[root@centos6 ~]# lspci |grep net               通过管道过滤net方面的内容
+[root@centos6 ~]# cat /proc/meminfo             查看内存的信息
+[root@centos6 ~]# lsusb                         查看usb的设备
+[root@centos6 ~]# cat /proc/bus/usb/devices     查看usb的设备信息
+[root@centos6 ~]# cat /proc/bus/input/devices   查看输入设备的信息
+[root@centos6 ~]# fdisk -l                      查看硬盘信息
+[root@centos6 桌面]# df -hT                     查看硬盘的使用情况
+[root@centos6 桌面]# uname -a                   查看系统的信息
+[root@centos6 桌面]# cat /proc/version          查看系统版本信息
+[root@centos6 桌面]# lsb_release  -a            查看系统的发布信息
+注：lsb是linux的一个核心标准
+[root@centos6 ~]# lsblk                         列出系统中的所有块设备信息
+[root@centos6 ~]# cat /proc/interrupts          查看设备中所有的IRQ信号，irq值越小优先级越高
+[root@centos6 ~]# dmidecode -t bios             查看bios信息
+[root@centos6 ~]# pstree -p |grep udev     查看udev这个daemons（守护进程），自动生成设备的名称和定义设备如何使用，它在/etc/rc.d/rc.sysinit脚本运行后开始工作。
+etc/udev/rules.d这个目录下存放了系统的规则文件
+[root@centos6 rules.d]# pstree -p |grep hal     这个daemon是实现程序和设备之间交流的，告诉程序如何使用设备

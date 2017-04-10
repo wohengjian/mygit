@@ -1,0 +1,162 @@
+======= MBR 分区方式 =========
+
+ ———————————————————————————————————————
+| grub,bootlader | 分区表 | magic number |
+|      446B      |     64 |              |   512B
+ ————————————————————————————————————————
+| bootsector引导扇区 |
+ ————————————————————
+    ————————————————————————————————————————       
+   |  boot group | 。。。。。。| boot group |  
+    ————————————————————————————————————————
+ ——————————————————————————————————————————————————————————————————		  
+| superblock | 文件系统描述信息 | 块位图 | inode 位图| inode表128B |
+ ——————————————————————————————————————————————————————————————————
+	                                                | a文件  10~14  |   
+    删掉的只是inode表 不写入可恢复数据	            | b文件  15~23  |
+	inode 12个直接区	3间接区			             ———————————————
+  
+元数据：记录硬盘属性 分区表之类
+MBR分区方式 硬盘最大2.2T
+
+扇区为最小的无力储存单位 每个扇区为512B
+第一个扇区最重要，里面有硬盘主引导记录（MBR）及分区表（partition table）
+MBR占有446B 分区表占有64B
+主分区    primary
+扩展分区  extended
+逻辑分区  logical
+能被格式化的仅有主分区和逻辑分区
+
+主分区和扩展分区最多可以有4个（硬盘限制）
+扩展分区最多只能有一个（操作系统设置）
+逻辑分区是由扩展分区分出来的分区
+能够被格式化后作为数据访问的分区主要分区与逻辑分区，扩展分区无法格式化
+逻辑分区的数量依操作系统不同，在linux中 IDE硬盘最多有59个逻辑分区 SATA硬盘则有11个逻辑分区
+
+
+linux中文件的权限和属性放到inode中 实际数据放到data blok块中
+超级块(super block)会记录整个文件系统的整体信息，包括inode与block的总量.使用量.剩余量等
+super block 记录此文件系统的整体信息
+inode       记录文件属性 一个文件占用一个inode，同时记录此文件的数据所在的block号码
+block       实际记录文件的内容，若文件太大时，会占用多个block
+
+inode表记录的数据：
+1.该文件的访问模式（read/write/excute）
+2.该文件的所有者与组（owner/group）
+3.该文件的大小
+4.该文件创建的或状态改变的时间
+5.最近一次的读取时间
+6.最近修改的时间
+7.定义文件特性的标志 如setUID
+8.该文件真正内容的指向
+每个inode文件的大小固定为128bytes
+每个文件都仅会占用一个inode
+文件系统能够创建的文件数量与inode的数量有关
+系统读取文件时需要先找到inode，并分析inode所记录的权限与用户是否符合，若符合才能够开始实际读取block内容
+
+			
+==========  文件系统  ===========
+
+文件系统：ext4（日志式文件系统），xfs，ntfs，fat32，tmpfs，proc
+文件系统是对一个存储设备上的元数据和数据进行组织管理的机制，可以简单理解为是告诉底层和上层如何去读取、存储数据
+
+日志式文件系统是类unix/Linux特有的，它会在启动时系统中生成一个journal。
+
+ls -i XXXX          xxxx的inode编号
+filefrag -v XXXX    xxxx的块信息
+dump
+
+
+2017/03/26
+软链接: 快捷方式，不占用块空间，但是占用inode空间，而且它的存在依赖于它的链接文件。
+硬链接：  类unix中特有的，可以用来备份重要文件，并且不占用inode，不占用块空间，但是不能跨分区
+复制：产生一个全新的文件，生成新的inode，占用块
+移动：同一个分区下，不占用块空间，只是重新定义inode。不同分区下，会重新调整inode和块空间。
+
+磁盘分区：MBR和GPT
+fdisk  -l  查看当前的硬盘分区参数
+[root@centos6 ~]# fdisk /dev/sdb
+针对sdb硬盘进行分区操作
+   d   delete a partition
+删除一个分区
+  l   list known partition types
+显示已知的分区类型
+   t   change a partition's system id
+改变分区的系统编号，编号通过l获取
+   n   add a new partition
+添加一个新分区
+   p   print the partition table
+显示分区表
+   q   quit without saving changes
+不保存退出
+   w   write table to disk and exit
+保存并退出
+  
+分区完成后，硬盘需要进行文件系统定义和挂载才能使用。
+[root@centos6 ~]# mkfs.ext4 /dev/sdb5
+格式化磁盘，文件系统定义为ext4
+[root@centos6 ~]# mount /dev/sdb5 dir/
+将硬盘sdb5挂载到dir目录下
+
+[root@centos6 ~]# mount -o remount,ro /dev/sdb5  
+重新挂载sdb5并定义为只读，还可以定义rw，noexec（不能执行）
+
+[root@centos6 dir]# fuser -mv /dev/sdb5
+对于卸载时进程的占用，可以通过上面的指令查看是谁占用了挂载的硬件，然后可以通过kill等指令干掉对方。
+
+[root@centos6 ~]# fsck.ext4 -fc /dev/sdb5
+进程强制自检并显示过程
+
+gpt分区：parted
+[root@centos6 ~]# parted /dev/sdb
+使用parted工具对sdb进行gpt分区
+mklabel  创建分区表，指明gpt
+mkpart   创建分区 
+
+[root@centos6 ~]# gedit /etc/fstab 
+这个文件是用来实现自动挂载
+
+swap  类似于windows中的虚拟内存的概念
+个人计算机 休眠 hibernate swap分区大小必须至少和内存大小一样
+服务器 oracle 等应用对swap有特定要求，不创建无法安装数据库
+
+swap划分除了安装系统过程中定义以外，在系统安装好后也可以后期再生成。有二种方式：
+一种是基于新的磁盘，一种是基于文件。
+[root@centos6 ~]# mkswap /dev/sdb1
+用swap格式来格式化文件系统
+[root@centos6 ~]# swapon  /dev/sdb1
+激活swap分区，如果需要关闭swap分区，使用swapoff 
+最后写入fstab中实现自动挂载
+
+第二种方式通过生成空文件来实现swap挂载
+[root@centos6 ~]#dd if=/dev/zero of=fileswap bs=1M count=100
+[root@centos6 ~]# mkswap fileswap
+[root@centos6 ~]# swapon  fileswap
+最后也可以写入到fstab中
+
+数据恢复
+http://codebay.cn/post/1977.html?1490402903150 
+
+lsof
+系统进程会在后台为所有的文件提供一个文件描述符
+[root@centos6 ~]# lsof | less
+COMMAND     PID      USER   FD      TYPE             DEVICE  SIZE/OFF       NODE NAME
+FD 文件描述符  
+cwd 当前的应用程序在哪个目录下工作
+txt 可以执行的文件，比如二进制代码程序
+mem 内存中调用的文件
+0u  这个是文件打开后返回的一个整数值，u表示可以读写，r表只读，w可以写
+type表示类型，dir（目录） reg（文件）
+clk（字符文件）blk（块设备文件）
+node 表示inode值
+[root@centos6 tmp]#lsof /var/log/messages    查看系统中被进程占用的这个文件的信息
+[root@centos6 tmp]# lsof |grep delete --color
+查找最近被删除过的文件，前提是系统没有重启
+根据文件描述符，找到/proc/进程号/fd/对应的文件描述符进行恢复
+[root@centos6 tmp]#cat 4 > /var/log/messages
+
+使用软件恢复
+debugfs
+r—linux
+foremost：支持的文件系统类型很多，但有些特定格式的文件不支持
+extundelete：支持ext文件系统。不能够实现同一个分区下的数据恢复

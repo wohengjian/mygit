@@ -1,0 +1,71 @@
+概念：所有文件都挂载根目录
+      linux中一切皆是文件
+
+backup       还原文档
+bin          构建系统所需的最少的指令 （常用指令）
+boot         linux(内核）和虚拟文件系统以及操作系统启动所需的文件
+dve          各种设备文件
+etc          系统软件和其他软件配置文件所在路径
+home         系统中普通用户的家目录
+root         root用户家目录
+lib/lib64    32位/64位 库文件存放路径
+media        挂载目录
+msic         挂载目录
+mnt          挂载目录
+net          和网络有关的文件
+opt/usr      可以选择的应用安装目录或者第三方安装路径
+proc         进程映像的映射（不占硬盘空间）
+sbin         系统操作相关的的指令  
+selinux      基于安全的一套策略
+             NSA（美国国防安全局）fedora（先行版red hat）
+tmp          类似于windows的temp（临时文件）内存中一些文件的映射	
+var          所有应用的数据都存放这里
+             比如日志等 一般大型的服务都专门为这个目录挂载专用的存储设备	
+
+
+==========   基本指令   =============
+在手册中查看内容时可以通过/关键词来检索重要内容，按n是将检索到的关键词从上往下查看，按shift+n是从下往上，按q退出manual page
+pgup|pgdn           查看文档一屏一屏
+enter               查看文档一行一行
+alias ls=‘xxx’      自定义指令
+man 1 ls            查看ls的帮助文档
+whatis ls           查看ls的描述
+which  ls           查看ls的来历
+ls  -help          表示分别由选项h、e、l、p结合
+ls  --help         两个-表示后面的选项就是一个单词，这个单词就是选项
+ls  -a            表示查看所有文件，在linux系统中，隐藏文件的文件名以.开头
+ll -d test/        查看目录
+ll test/           查看目录里的内容
+rm  -f             等同于  rm --force
+rm -rf *           删除当前文件夹下所有文件（慎用）
+gnome-terminal     呼出终端命令
+rm                 删除文件
+rmdir              删除空目录
+mkdir              创建目录
+useradd            创建普通用户
+touch              创建文件
+su tom             切换到普通用户TOM
+sync                 将内存中的内容写入缓存
+poweroff             保存完后关机（常用）
+shutdown             关机
+halt = shutdown -h   快速关机
+pwd                  查看当前目录
+-d                   解压
+chmod 400 passwd 表示passwd文件除了使用具备只读权限外，其他人不具备任何权限
+chown tom:tom filename  改变拥有者和群组
+
+tar zxvf figlet.tar.gz  解压gz格式的文件
+
+
+
+
+
+===========    快捷键   =============== 
+ctrl alt t  打开终端
+ctrl shift  t  一个窗口多个终端
+ctrl shift f1-f7  
+ctrl c  终止当前命令
+ctrl l 清屏
+shift  pgup|pgdn    在终端下翻屏
+ctrl d  退出终端
+终端终结者  terminator  

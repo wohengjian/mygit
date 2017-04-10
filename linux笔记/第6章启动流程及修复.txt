@@ -1,0 +1,179 @@
+**************************************************************************
+*********************   Centos6 的启动流程   *****************************
+**************************************************************************
+1、POST poweron secure test
+cmos软件 bios固件
+2、BOOT 
+3、识别MBR 512B  
+446（引导加载器）：GRUB LILO
+64  分区表（每个分区占用16B）
+2 magic number魔数
+4、读取stage1 
+stage1_5 识别各种文件系统
+stage2  出现的就是grub界面
+5、读取grub.conf 这个文件决定了grub界面的所有内容
+6、根据grub.conf的配置读取内核和虚拟文件系统
+7、启动init 父进程(PID 1)   /sbin/init   
+8、读取配置文件/etc/inittab(选择进入系统的类型 runlevel)
+#   0 - halt (Do NOT set initdefault to this)
+#   1 - Single user mode  单用户模式
+#   2 - Multiuser, without NFS (The same as 3, if you do not have networking)  多用户模式
+#   3 - Full multiuser mode 没有图形化的，只能用终端
+#   4 - unused
+#   5 - X11  图形化
+#   6 - reboot (Do NOT set initdefault to this)
+9、根据inittab中定义的启动级别，去相应的目录启动需要的脚本。比如是0级别，就去/etc/rc0.d目录下启动所有脚本
+同时需要执行fstab和rc.local
+注：fstab是系统自动挂载需要的配置
+
+=====sysV init 启动过程中的故障修复======
+============root密码的破解===============
+选择内核kernel
+按e
+在最后修改内容init 1 或 single 或 s
+按b引导内核进入单用户模式
+passwd   
+
+**************************************************************************
+*******************   CentOs6内核升级失败的修复   ************************
+**************************************************************************
+/boot/vmlinuz***  内核
+/boot/initrd***   虚拟文件系统
+开机进入固件BIOS
+BOOT 选择从光盘启动
+选择 rescue installed sysetm 救援模式
+选择 OK/OK/no network /continue/ok/ok
+shell startshell
+bash-4.1#chroot  /mnt/sysimage  将光盘中的这个路径切换为/
+sh-4.1#mount /dev/cdrom /mnt
+挂载光盘到当前的mnt目录中，这个mnt是硬盘中的mnt目录
+cd /mnt
+ls
+cd Packages/
+ls Kernel-(tab)
+rpm -ivh  参数i表示安装 --force
+rpm -ivh --force  kernel-2.****.rpm
+exit
+reboot
+
+=======mbr分区中的grub修复（先linux，后window）=========
+进入救援模式，与修复系统相同
+bash-4.1#chroot /mnt/sysimage
+sh-4.1#mount /dev/cdrom /mnt
+sh-4.1#grub-install /dev/sda 
+grub-install是安装文件 不在Packages里面 直接TAB
+
+模拟grub被覆盖
+dd if=/dev/zero of=/dev/sda bs=1 count=446
+删除引导界面446字节 bs默认单位为1K
+if从xxx取（从zero取）if放到哪里 bs表示需要大小 count表示个数
+
+boot的修复，救援模式
+
+
+========grub.conf文件的配置========
+gedit /boot/grub/grub.conf  打开文档
+default=0 从第几个选项内核开始引导,0为第一个
+timeout=5 等待操作时间
+hiddenmenu 是否要显示grub菜单栏目,默认开启
+title Centos6 标签
+
+==========grub的加密==============
+grub-md5-crypt
+Password：12345
+复制生成的密文码
+生成的md5码添加到grub.cfg的标签title Centos6后下一行
+password --md5  黏贴密文码
+
+
+***********************************************************************************************      RHEL7的启动       *****************************
+**************************************************************************
+systemd  取代了 sysV init
+ubuntu  upstart  epach muda 
+init  rc5.d
+苹果mac os launchd
+gnu lgpl 
+cgroup  为每个进程分配一个cgroup
+systemd 使用target来控制系统服务的启动
+rhel6中使用runlevel，7中用target替代
+第一个启动的通常都是default.target
+对比两个系统的启动级别
+0              poweroff.target 
+1              resuce.target 
+2              multi-user.target 
+3
+4
+5              graphical.target    
+6
+
+ systemctl set-default multi-user.target    设置默认启动服务，下次启动生效
+ 
+ systemd-analyze time                  查看启动时间 
+ systemctl isolate graphical.target    切换进入其他级别  
+ systemctl list-units                  查看系统中存在的服务
+ systemctl list-units --type=service   查看后缀service的服务
+ 
+=======/usr/lib/systemd/system target路径================
+ /etc/systemd/system/default.target  主配置文件
+ 132  systemctl is-active sshd.service   查看服务是否启动
+ 133 systemctl stop sshd.service         关闭服务
+ 136  ps -aux |grep sshd                 查看sshd进程
+ 137  systemctl start sshd.service       启动进程
+      service sshd stop
+
+修改grub.cfg来决定系统的启动顺序等需要修改/etc/default/grub,然后使用命令grub2-mkconfig -o  /boot/grub2/来更新grub.cfg的配置，如果是debain类的系统中使用update-grub2来更新
+[root@localhost grub.d]# grub2-set-default 1
+
+rescue 模式 单用户模式   需要密码
+emergency 模式
+
+=======第一种Rhel7破解root密码的方式 ====================
+进入grub界面 选择内核 按E 
+在linux16-那一行 最后rhgb quiet 后加入 init=/bin/sh  
+crtl+x 引导进入
+进入后sh2.4#  此时输入passwd是无法修改成功的
+sh2.4#  mount -o  remount，rw /
+mount是挂载，参数-o是额外的选项，选项就是remount（重新挂载），rw表示权限
+sh2.4#  passwd 
+修改密码，成功
+sh2.4#  touch /.autorelabel 
+创建这个文件的目的是为了让selinux自动打标签
+sh2.4#  exec /sbin/init
+手动启用刚才的进程
+
+
+=======第二种hel7下破解root密码的方式（推荐）============
+进入Grub界面，选择内核，按E
+内核后面（Linux16-后面）跟上参数  rd.break  > ctrl+x
+mount -o remount,rw  /sysroot/  重新挂载并要求sysroot可以读写
+chroot /sysroot/                切换根
+passwd                          修改密码
+load_policy -i                  加载selinux
+chcon -t shadow_t /etc/shadow   修改shadow的上下文
+touch /.autorelabel             重建selinux标签
+exit  reboot
+
+============rhel7中grub的修复=====================
+通过光盘引导
+sh-4.2#chroot /mnt/sysimage  切换根
+bash-4.2#grub2-install /dev/sda   安装grub
+
+===========rhel7中内核等引导文件的修复=============
+通过光盘引导
+sh-4.2#chroot /mnt/sysimage  切换根
+bash-4.2#cd /  进入/
+bash-4.2#mount /dev/cdrom  /media  挂载光盘到media目录中
+bash-4.2#rpm -ivh --force /media/Package/kernel-3.10.rpm
+安装内核，安装完成后，boot目录中会生成内核和虚拟文件系统
+grub2-install /dev/sda  安装grub2，安装成功后会在/boot目录下生成grub所需要的文件，但是缺少grub.cfg配置文件
+grub2-mkconfig -o /boot/grub2/grub.cfg
+生成grub.cfg文件
+
+==============添加grub加密==================
+在/etc/grub.d/00_header 的末尾添加如下内容：
+cat  << EOF
+set superusers="tom"
+password tom  redhat
+EOF
+最后执行更新grub.cfg操作
+grub2-mkconfig -o /boot/grub2/grub.cfg

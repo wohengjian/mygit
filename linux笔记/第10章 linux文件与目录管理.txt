@@ -1,0 +1,141 @@
+rm           删除文件
+rmdir        删除空目录
+mkdir        创建目录
+mkdir -p
+需要时创建目标目录的上层目录，即使这些目录已经存在也不报错
+
+echo $PATH   
+$是一个变量符号，PATH是一个变量名称，这里表示请求查看当前用户的指令执行路径
+
+
+ll -d test/  查看目录
+ll test/     查看目录里的内容
+
+
+cp                      拷贝
+cp -p                   拷贝不改变时间簇
+cp -h                   查看拷贝大小
+cp -r /etc/* .          递归拷贝（拷贝文件夹）
+cp -rf /etc/* .         强制拷贝
+mv test/ yyy            移动重命名
+touch                   创建文件 
+FHS（文件系统层次标准）；可以被共享的 不可以被共享的 可以改动的 不可以被改动的
+/usr 是可以被共享 不可以被修改
+/etc/ /boot/ 不可以被共享的 可以修改
+/var  可以被改变  其中  /war/run /war/lock 不可以共享 不可改变
+FHS 定义了三层目录下应该的数据；
+/  /war  /usr
+cat                 查看小文件（不适合大文件 只保留尾部）
+cat -n              显示行号
+nl                  同cat 忽略空行
+stdin stdou stderr 标准输入 标准输出 标准错误
+more service       不可前翻  /xxx搜索
+less service       同more n 下找  shift+n 上找 （大文档）
+tail -5 service           查看最后5行
+head 4 service            查看开头4行  ctrl+c
+tailf /var/log/messages   查看日志更新
+
+
+umask 文件权限过滤符
+umask的值由4位数2构成，最后三位分别表示ugo
+文件          目录
+6   6   6     7   7   7
+rw- rw- rw-   rwx rwx rwx
+          0022
+rw- r-- r--   rwx r-x r-x
+umask -s 默认权限下经过过滤后保留的权限
+普通用户默认是0002
+root用户默认是0022
+
+lasttr -d test/      查看隐藏属性 
+chattr +隐藏属性 +目标文件加目录
+chattr +a test/      添加a属性（只能创建 不能删除）
+chattr +A rest/      禁止修改文件时间簇
+a 表示文件只能创建 不能删除
+A 不能修改文件时间簇
+i 针对文件只读 不能执行如何属性的修改和文件内容的修改。针对目录不可以删除和创建文件在目录中
+wget https://download3.vmware.com/software/wkst/file/VMware-Workstation-Full-11.0.0-2305329.x86_64.bundle
+
+
+
+2017/3/19 上午
+umask  文件权限过滤符
+umask的值由4位数构成，最后三位分别表示ugo
+文件                目录
+6    6    6       7   7    7
+rw-  rw-  rw-    rwx  rwx  rwx
+              0022
+rw-  r--  r--    rwx  r-x  r-x
+6     4   4       7   5    5
+              0333
+4    4    4       4   4    4
+
+隐藏属性  chattr  +选项  目标文件或目录
+只能使用unix/linux类的文件系统，不支持vfat文件系统
+a  目录中的内容只能添加不能删除
+A  不能修改文件的访问时间
+i  针对文件只读，不能执行任何属性的修改和文件内容的修改。针对目录，不可以删除和创建内容在目录中。
+S  立即执行同步写操作，不缓存数据的
+u  保证备份进行数据恢复的（未成功）
+
+[root@centos6 test]# ll /usr/bin/passwd   查看passwd命令权限
+在u的位置的执行权限不是x，而是s，这个就是suid
+当一个文件被设置了suid，那么所有用户在执行这个文件时就具备了和这个文件的所有者同等的权限。这个权限通常只是针对文件设置。针对文件
+
+[root@centos6 /]# chmod g+s test/  设置目录为sgid
+目录被设置SGID后，任何人再这个目录中建立的文件，都属于这个目录本身所属组。针对目录
+
+SBIT：在设置了sbit的目录中，只有文件的所有者或者是目录的所有者以及root可以删除
+[root@centos6 /]# chmod o+t test/
+设置test目录为sbit权限
+
+umask的第一位就是过来suid（4），sgid（2）和sbit（1）权限的。
+[root@centos6 /]# chmod 2777 /test/
+这个表示给test目录添加sgid
+
+注：如果在文件或者目录设置了suid等相关权限后出现的是大写的S或者T，表示本身这个目录或者文件没有执行x权限
+
+
+======= 文件查找 find ========== 
+[root@centos6 tmp]# find /home -print 
+通过find查找家目录下的所有文件并打印出来。-print0表示不换行。
+[root@centos6 /]# find / -name shadow 
+查找匹配的文件，-name表示文件名称，-iname表示忽略大小写。
+[root@centos6 tmp]# find . -type d 
+参数-type表示文件类型：
+l  链接文件
+d  目录
+f  普通文件
+c  字符文件
+p  管道文件
+s  套接字文件
+
+-maxdepth  目录的最大深度，表示最多检索多少层目录
+-mindepth  目录的最小深度，表示必须要从多少层开始检索
+
+[root@centos6 tmp]# find /  -maxdepth 2 -type f -name 6.pdf  
+多个参数叠加搜索，要注意检索时的参数顺序
+
+根据时间戳查找：
+访问时间（atime）（amin）
+修改时间（ctime）（cmin）
+变化时间（mtime）（mmin）
+[root@centos6 tmp]# find . -type f -atime +2 
+表示查找当前目录下的2天以前被访问过的普通文件。-2表示2天以内的文件。2表示正好2天。
+[root@centos6 tmp]# find . -type d -amin -5
+[root@centos6 tmp]# find . -type f -newer test1
+根据test1文件的时间戳列出比它更新的普通文件
+[root@centos6 tmp]# find . -size +10 
+查找出当前目录下所有大于10K的文件，如果是大于10M，需要指明+10M
+[root@centos6 tmp]# find . -size +90M -size -110M  指定大小范围检索
+[root@centos6 tmp]# find . -user tom -group root  根据用户名和组查找
+[root@centos6 tmp]# find . -iname \*.mp4 -delete
+查找出所有的mp4后缀的文件并删除
+[root@centos6 tmp]# find . -type f  -perm 777
+查找文件权限为777的普通文件
+[root@centos6 tmp]# find . -type f -perm -111
+查找普通文件中ugo三组中必须都有执行x权限的文件。-表示和。+表示或
+[root@centos6 tmp]# find . -type f -user tom  -exec chown root {} \;
+参数-exec是find工具中最强大的一个匹配选项，可以在检索完成后执行特定动作和指令。{}用来将检索后的内容匹配到命令中去。
+上面的意思整体就是查找属于tom 用户的所有普通文件，然后将所有文件的所有者改为root。
+
